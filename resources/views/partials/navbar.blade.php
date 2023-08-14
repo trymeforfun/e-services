@@ -15,8 +15,10 @@
 
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <!-- Navbar Logo-->
+        <a class="navbar-logo ps-3" href="index.html"><img src="{{ url('/logo.jpg') }}" width="35" height="35" alt=""></a>
         <!-- Navbar Brand-->
-        <a class="navbar-brand ps-3" href="index.html">{{ env('APP_NAME') }}</a>
+        <a class="navbar-brand ps-3" href="index.html" style="font-size: 12px">E-Services Laundry Sepatu</a>
         <!-- Sidebar Toggle-->
         <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i
                 class="fas fa-bars"></i></button>
