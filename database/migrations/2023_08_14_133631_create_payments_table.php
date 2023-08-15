@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('payments', function (Blueprint $table) {
             $table->id();
-            $table->string('invoice_number');
+            $table->string('invoice_number')->nullable();
             $table->date('due_date')->nullable();
             $table->string('bill_to')->nullable();
             $table->string('payable_to')->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->tinyInteger('pick_&_delivery');
             $table->string('tax');
             $table->string('discount');
-            $table->date('amount_due')->nullable();
+            $table->string('amount_due')->nullable();
             $table->string('bank');
             $table->timestamps();
         });

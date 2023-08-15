@@ -2,27 +2,22 @@
 @section('content')
     <div class=" w-50 mb-3 p-5">
         <h4 class="mt-3">Tambah Data</h4>
-        <form method="POST" class="mt-5" action="{{ url('/post-customer') }}">
+        <form method="POST" class="mt-5" action="{{ url('/post-pengembalian') }}">
             @csrf
             <div class="mb-3">
-                <input type="hidden" name="customer_id" value="{{ $customer ? $customer->id : 0 }}">
-                <label class="form-label">Nama Customer</label>
-                <input type="text" name="name" value="{{ $customer ? $customer->name : '' }}" class="form-control">
-                <label class="form-label">No. HP</label>
-                <input type="text" name="phone" value="{{ $customer ? $customer->phone : '' }}" class="form-control">
-                <label class="form-label">Brand Sepatu</label>
-                <input type="text" name="shoe_brand" value="{{ $customer ? $customer->shoe_brand : '' }}"
-                    class="form-control">
-                <label class="form-label">Warna</label>
-                <input type="text" name="color" value="{{ $customer ? $customer->color : '' }}" class="form-control">
-                <label class="form-label">Ukuran Sepatu</label>
-                <input type="text" name="size" value="{{ $customer ? $customer->size : '' }}" class="form-control">
-                <label class="form-label">Tanggal Order</label>
-                <input type="date" name="order_date" value="{{ $customer ? $customer->order_date : '' }}"
-                    class="form-control">
-                <label class="form-label">Alamat</label>
-                <textarea name="address" id="" class="form-control"
-                    cols="10" rows="2">{{ $customer ? $customer->address : '' }}</textarea>
+                <label class="form-label">Customer</label>
+                <select class="form-select" required name="customer_id" id="">
+                    <option disabled>pilih</option>
+                    @forelse ($customers as $key => $cust)
+                        <option value="{{ $cust->id }}"
+                            @if ($cust->id == old('customer_id', $data->customer_id ?? 0)) selected="selected" @endif>
+                            {{ $cust->name }}</option>
+                    @empty
+                        <option value="">data tidak ditemukan</option>
+                    @endforelse
+                </select>
+                <label class="form-label">Komentar</label>
+                <textarea name="comment" id="" required class="form-control" cols="10" rows="2">{{ $data ? $data->comment : '' }}</textarea>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>

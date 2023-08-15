@@ -3,10 +3,10 @@
     <div class="container mt-5 w-100">
         <div class="row justify-content-between">
             <div class="col">
-                <h4>Order Jasa</h4>
+                <h4>Pembayaran</h4>
             </div>
             <div class="col">
-                <a href="{{ url('/create-customer') }}" class="btn btn-sm btn-primary">Tambah data</a>
+                <a href="{{ url('/create-pembayaran') }}" class="btn btn-sm btn-primary">Tambah data</a>
             </div>
         </div>
         <form action="" method="get">
@@ -15,30 +15,34 @@
         <table class="table mt-4">
             <thead>
                 <tr>
-                    <th scope="col">Nama Customer</th>
-                    <th scope="col">No. HP</th>
-                    <th scope="col">Brand Sepatu</th>
-                    <th scope="col">Ukuran</th>
-                    <th scope="col">Minus</th>
+                    <th scope="col">No. Invoice</th>
+                    <th scope="col">Tagihan untuk</th>
+                    <th scope="col">Tenggat Waktu</th>
+                    <th scope="col">Diskon</th>
+                    <th scope="col">Tax</th>
+                    <th scope="col">Jumlah jatuh tempo</th>
+                    <th scope="col">Total</th>
                     <th scope="col">Aksi</th>
                 </tr>
             </thead>
             <tbody>
-                @forelse ($customers as $customer)
+                @forelse ($datas as $data)
                     <tr>
-                        <td>{{ $customer->name }}</td>
-                        <td>{{ $customer->phone }}</td>
-                        <td>{{ $customer->shoe_brand }}</td>
-                        <td>{{ $customer->size }}</td>
-                        <td>{{ $customer->minus }}</td>
+                        <td>{{ $data->invoice_number }}</td>
+                        <td>{{ $data->customer_name }}</td>
+                        <td>{{ $data->due_date }}</td>
+                        <td>{{ $data->discount }}</td>
+                        <td>{{ $data->tax }}</td>
+                        <td>{{ $data->amount_due }}</td>
+                        <td>{{ $data->total }}</td>
                         <td>
                             <div class="d-flex gap-2">
                                 <div class="">
-                                    <a href="{{ url('/edit-customer/' . $customer->id) }}"
+                                    <a href="{{ url('/edit-pembayaran/' . $data->id) }}"
                                         class="btn btn-sm btn-warning">edit</a>
                                 </div>
                                 <div class="">
-                                    <form action="{{ url('/delete-customer/' . $customer->id) }}" method="post">
+                                    <form action="{{ url('/delete-pembayaran/' . $data->id) }}" method="post">
                                         @csrf
                                         <button type="submit" class="btn btn-sm btn-danger">delete</button>
                                     </form>
@@ -48,12 +52,12 @@
                     </tr>
                 @empty
                     <tr>
-                        <td colspan="7">data tidak ada</td>
+                        <td colspan="7">data tidak ditemukan</td>
                     </tr>
                 @endforelse
             </tbody>
         </table>
 
-        {{ $customers->links() }}
+        {{ $datas->links() }}
     </div>
 @endsection

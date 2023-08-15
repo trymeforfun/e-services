@@ -1,28 +1,39 @@
 @extends('layouts.template')
 @section('content')
     <div class=" w-50 mb-3 p-5">
-        <h4 class="mt-3">Tambah Data</h4>
-        <form method="POST" class="mt-5" action="{{ url('/post-customer') }}">
+        <h4 class="mt-3">Tambah Data Pembayaran</h4>
+        <form method="POST" class="mt-5" action="{{ url('/post-pembayaran') }}">
             @csrf
             <div class="mb-3">
-                <input type="hidden" name="customer_id" value="{{ $customer ? $customer->id : 0 }}">
-                <label class="form-label">Nama Customer</label>
-                <input type="text" name="name" value="{{ $customer ? $customer->name : '' }}" class="form-control">
-                <label class="form-label">No. HP</label>
-                <input type="text" name="phone" value="{{ $customer ? $customer->phone : '' }}" class="form-control">
-                <label class="form-label">Brand Sepatu</label>
-                <input type="text" name="shoe_brand" value="{{ $customer ? $customer->shoe_brand : '' }}"
+                <input type="hidden" name="pembayaran_id" value="{{ $data ? $data->id : 0 }}">
+                <label class="form-label">Customer</label>
+                <select class="form-select" required name="bill_to" id="">
+                    <option  disabled>pilih</option>
+                    @forelse ($customers as $key => $cust)
+                        <option value="{{ $cust->id }}"
+                            @if($cust->id == old('bill_to',$data->bill_to))
+                                selected="selected"
+                            @endif
+                            >{{ $cust->name }}</option>
+                    @empty
+                        <option value="">data tidak ditemukan</option>
+                    @endforelse
+                </select>
+                <label class="form-label">Jumlah</label>
+                <input type="text" required name="many" value="{{ $data ? $data->many : '' }}" class="form-control">
+                <label class="form-label">Harga</label>
+                <input type="text" required name="price" value="{{ $data ? $data->price : '' }}" class="form-control">
+                <label class="form-label">Jumlah Jatuh Tempo</label>
+                <input type="text" required name="amount_due" value="{{ $data ? $data->amount_due : '' }}"
                     class="form-control">
-                <label class="form-label">Warna</label>
-                <input type="text" name="color" value="{{ $customer ? $customer->color : '' }}" class="form-control">
-                <label class="form-label">Ukuran Sepatu</label>
-                <input type="text" name="size" value="{{ $customer ? $customer->size : '' }}" class="form-control">
-                <label class="form-label">Tanggal Order</label>
-                <input type="date" name="order_date" value="{{ $customer ? $customer->order_date : '' }}"
+                <label class="form-label">Diskon</label>
+                <input type="text" required name="discount" value="{{ $data ? $data->discount : '' }}"
                     class="form-control">
-                <label class="form-label">Alamat</label>
-                <textarea name="address" id="" class="form-control"
-                    cols="10" rows="2">{{ $customer ? $customer->address : '' }}</textarea>
+                <label class="form-label">Bank</label>
+                <input type="text" required name="bank" value="{{ $data ? $data->bank : '' }}" class="form-control">
+                <label class="form-label">Tanggal Jatuh Tempo</label>
+                <input type="date" required name="due_date" value="{{ $data ? $data->due_date : '' }}"
+                    class="form-control">
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
