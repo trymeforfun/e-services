@@ -17,18 +17,18 @@
                         Penjemputan
                     </a>
                     @endrole
-                    @role('shoe_keeper|production_staff')
+                    {{-- @role('shoe_keeper|production_staff') --}}
                     <a class="nav-link {{ Request::path() == 'pengerjaan' ? 'bg-secondary' : '' }}"
                         href="{{ url('/pengerjaan') }}">
                         Pengerjaan
                     </a>
-                    @endrole
-                    @role('shoe_keeper|customer')
+                    {{-- @endrole --}}
+                    {{-- @role('shoe_keeper|customer') --}}
                     <a class="nav-link {{ Request::path() == 'pengembalian' ? 'bg-secondary' : '' }}"
                         href="{{ url('/pengembalian') }}">
                         Pengembalian
                     </a>
-                    @endrole
+                    {{-- @endrole --}}
                     @role('admin|customer')
                     <a class="nav-link {{ Request::path() == 'pembayaran' ? 'bg-secondary' : '' }}"
                         href="{{ url('/pembayaran') }}">

@@ -11,7 +11,7 @@
                     <option  disabled>pilih</option>
                     @forelse ($customers as $key => $cust)
                         <option value="{{ $cust->id }}"
-                            @if($cust->id == old('bill_to',$data->bill_to))
+                            @if($data != null && $cust->id == old('bill_to',$data->bill_to))
                                 selected="selected"
                             @endif
                             >{{ $cust->name }}</option>

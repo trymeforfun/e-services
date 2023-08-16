@@ -5,6 +5,7 @@
         <form method="POST" class="mt-5" action="{{ url('/post-pengembalian') }}">
             @csrf
             <div class="mb-3">
+                <input type="hidden" name="pengembalian_id" value="{{ $data ? $data->id : 0 }}">
                 <label class="form-label">Customer</label>
                 <select class="form-select" required name="customer_id" id="">
                     <option disabled>pilih</option>

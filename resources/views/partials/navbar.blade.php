@@ -16,7 +16,8 @@
 <body class="sb-nav-fixed">
     <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
         <!-- Navbar Logo-->
-        <a class="navbar-logo ps-3" href="index.html"><img src="{{ url('/logo.jpg') }}" width="35" height="35" alt=""></a>
+        <a class="navbar-logo ps-3" href="index.html"><img src="{{ url('/logo.jpg') }}" width="35" height="35"
+                alt=""></a>
         <!-- Navbar Brand-->
         <a class="navbar-brand ps-3" href="index.html" style="font-size: 12px">E-Services Laundry Sepatu</a>
         <!-- Sidebar Toggle-->
@@ -40,9 +41,14 @@
                     <li>
                         <hr class="dropdown-divider" />
                     </li>
-                    <li><a class="dropdown-item" href="#!">Logout</a></li>
+                    <li class="text-center">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+
+                            <button type="submit" class="btn btn-outline-danger">logout</button>
+                        </form>
+                    </li>
                 </ul>
             </li>
         </ul>
     </nav>
-

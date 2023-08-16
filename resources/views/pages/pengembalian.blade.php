@@ -24,8 +24,8 @@
             <tbody>
                 @forelse ($datas as $data)
                     <tr>
-                        <td>{{ $data->name }}</td>
-                        <td>{{ $data->phone }}</td>
+                        <td>{{ $data->customer_name }}</td>
+                        <td>{{ $data->customer_phone }}</td>
                         <td>{{ $data->comment ?? "" }}</td>
                         <td>
                             <div class="d-flex gap-2">
