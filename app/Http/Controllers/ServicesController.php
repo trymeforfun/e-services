@@ -2,13 +2,151 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class ServicesController extends Controller
 {
+
+
     // ================================================================= USER & ROLES
+    function get_user(Request $request)
+    {
+        $users = User::with('roles')->where(function ($customer) use ($request) {
+            $customer->where('name', 'like', '%' . $request->search . '%')->orWhere('email', 'like', '%' . $request->search . '%');
+        })->when($request->start_date && $request->end_date, function ($result) use ($request) {
+            $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
+        })->paginate(10);
+
+        return view('pages.user.index', compact('users'));
+    }
+
+    function create_user(Request $request)
+    {
+        $roles = Role::get();
+        $user = null;
+        return view('pages.user.form', compact('user', 'roles'));
+    }
+
+    function store_user(Request $request)
+    {
+        $user = User::updateOrCreate(['id' => $request->id], ['name' => $request->u_name, 'email' => $request->u_email, 'password' => $request->u_password]);
+
+        $user->assignRole($request->role_id);
+
+        if ($user) {
+            return redirect('/users');
+        }
+        return back();
+    }
+
+    function edit_user($id)
+    {
+        $roles = Role::get();
+        $user = User::where('id', $id)->first();
+        return view('pages.user.form', compact('user', 'roles'));
+    }
+
+    function delete_user($id)
+    {
+        User::where('id', $id)->delete();
+
+        return redirect('/users');
+    }
+
+
+    function get_role(Request $request)
+    {
+        $roles = Role::where(function ($customer) use ($request) {
+            $customer->where('name', 'like', '%' . $request->search . '%');
+        })->when($request->start_date && $request->end_date, function ($result) use ($request) {
+            $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
+        })->paginate(10);
+
+        return view('pages.role.index', compact('roles'));
+    }
+    function store_role(Request $request)
+    {
+        $role = Role::updateOrCreate(['id' => $request->role_id], ['name' => $request->role_name]);
+
+        foreach ($request->permissions as $key => $value) {
+            $role->givePermissionTo($value);
+        }
+
+        if ($role) {
+            return redirect('/roles');
+        }
+        return back();
+    }
+
+    function create_role(Request $request)
+    {
+        $role = null;
+        $permissions = Permission::get();
+
+        return view('pages.role.form', compact('permissions', 'role'));
+    }
+
+    function edit_role($id)
+    {
+        $role = Role::with('permissions')->where('id', $id)->first();
+        $permissions = Permission::get();
+
+        return view('pages.role.form', compact('permissions', 'role'));
+    }
+
+    function delete_role($id)
+    {
+        $role = Role::where('id', $id)->delete();
+        return redirect('/roles');
+    }
+
+
+
+    function get_permission(Request $request)
+    {
+        $permissions = Permission::where(function ($customer) use ($request) {
+            $customer->where('name', 'like', '%' . $request->search . '%');
+        })->when($request->start_date && $request->end_date, function ($result) use ($request) {
+            $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
+        })->paginate(10);
+
+        return view('pages.permission.index', compact('permissions'));
+    }
+    function store_permission(Request $request)
+    {
+        $permission = Permission::updateOrCreate(['id' => $request->permission_id], ['name' => $request->permission_name]);
+
+        if ($permission) {
+            return redirect('/permission');
+        }
+        return back();
+    }
+
+    function create_permission(Request $request)
+    {
+        $permission = null;
+
+        return view('pages.permission.form', compact('permission'));
+    }
+
+    function edit_permission($id)
+    {
+        $permission = Permission::where('id', $id)->first();
+
+        return view('pages.permission.form', compact('permission'));
+    }
+
+    function delete_permission($id)
+    {
+        $role = Permission::where('id', $id)->delete();
+        return redirect('/permission');
+    }
+
 
 
 
@@ -353,7 +491,6 @@ class ServicesController extends Controller
 
         unset($payload['_token']);
         unset($payload['pengembalian_id']);
-        return $payload;
         if ($payload['customer_id'] != 0) {
             $payload['updated_at'] = now();
             $isSaved = DB::table('monitoring')->where('customer_id', $payload['customer_id'])->update($payload);
@@ -406,24 +543,37 @@ class ServicesController extends Controller
                 ->orWhere('size', 'like', '%' . $request->search . '%')
                 ->orWhere('minus', 'like', '%' . $request->search . '%')
                 ->orWhere('shoe_brand', 'like', '%' . $request->search . '%');
-        })->when($request->start_date && $request->end_date, function ($result) use ($request) {
+        })
+        ->join('payments', 'customers.id', '=', 'payments.bill_to')
+        ->when($request->start_date && $request->end_date, function ($result) use ($request) {
             $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
         })->paginate(10);
 
-        return view('pages.order_jasa', compact('customers'));
+        return view('pages.laporan', compact('customers'));
     }
 
 
     function print_laporan(Request $request)
     {
-        $pdf = PDF::loadView('', compact('pasiens', 'merchant'));
+        $customers = DB::table('customers')->where(function ($customer) use ($request) {
+            $customer->where('name', 'like', '%' . $request->search . '%')->orWhere('phone', 'like', '%' . $request->search . '%')
+                ->orWhere('size', 'like', '%' . $request->search . '%')
+                ->orWhere('minus', 'like', '%' . $request->search . '%')
+                ->orWhere('shoe_brand', 'like', '%' . $request->search . '%');
+        })
+        ->join('payments', 'customers.id', '=', 'payments.bill_to')
+        ->when($request->start_date && $request->end_date, function ($result) use ($request) {
+            $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
+        })->paginate(10);
+
+        $pdf = PDF::loadView('laporan_pdf', compact('customers'));
         $pdf->setPaper('A4', 'portrait');
         $pdf->setOption('margin-top', 0);
         $pdf->setOption('margin-right', 0);
         $pdf->setOption('margin-bottom', 0);
         $pdf->setOption('margin-left', 0);
 
-        $loadPdf = $pdf->stream('data-pasien.pdf');
+        $loadPdf = $pdf->stream('data-laporan.pdf');
 
         return $loadPdf;
     }

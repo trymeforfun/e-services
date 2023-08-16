@@ -19,6 +19,24 @@ Route::get('/', function () {
     return view('login');
 });
 
+// user & role & permission
+Route::get('/users', [ServicesController::class, 'get_user'])->name('user');
+Route::get('/create-user', [ServicesController::class, 'create_user']);
+Route::post('/store-user', [ServicesController::class, 'store_user']);
+Route::get('/edit-user/{id}', [ServicesController::class, 'edit_user']);
+Route::post('/delete-user/{id}', [ServicesController::class, 'delete_user']);
+Route::get('/roles', [ServicesController::class, 'get_role'])->name('role');
+Route::get('/create-role', [ServicesController::class, 'create_role']);
+Route::get('/edit-role/{id}', [ServicesController::class, 'edit_role']);
+Route::post('/store-role', [ServicesController::class, 'store_role']);
+Route::get('/delete-role/{id}', [ServicesController::class, 'delete_role']);
+Route::get('/permission', [ServicesController::class, 'get_permission'])->name('permission');
+Route::get('/create-permission', [ServicesController::class, 'create_permission']);
+Route::get('/edit-permission/{id}', [ServicesController::class, 'edit_permission']);
+Route::post('/store-permission', [ServicesController::class, 'store_permission']);
+Route::post('/delete-permission/{id}', [ServicesController::class, 'delete_permission']);
+
+
 // order jasa
 Route::get('/dashboard', [ServicesController::class, 'get_customers'])->name('dashboard');
 Route::post('/post-customer', [ServicesController::class, 'post_customer']);
@@ -68,10 +86,6 @@ Route::post('/delete-pengerjaan/{id}', [ServicesController::class, 'delete_penge
 // laporan
 Route::get('/laporan', [ServicesController::class, 'get_laporan'])->name('laporan');
 Route::post('/print-laporan', [ServicesController::class, 'print_laporan']);
-
-
-
-
 
 
 Route::middleware('auth')->group(function () {
