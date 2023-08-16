@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\Snappy\Facades\SnappyPdf as PDF;
+use Illuminate\Support\Facades\Hash;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -34,7 +35,7 @@ class ServicesController extends Controller
 
     function store_user(Request $request)
     {
-        $user = User::updateOrCreate(['id' => $request->id], ['name' => $request->u_name, 'email' => $request->u_email, 'password' => $request->u_password]);
+        $user = User::updateOrCreate(['id' => $request->id], ['name' => $request->u_name, 'email' => $request->u_email, 'password' => Hash::make($request->u_password)]);
 
         $user->assignRole($request->role_id);
 
@@ -73,8 +74,10 @@ class ServicesController extends Controller
     {
         $role = Role::updateOrCreate(['id' => $request->role_id], ['name' => $request->role_name]);
 
-        foreach ($request->permissions as $key => $value) {
-            $role->givePermissionTo($value);
+        if (isset($request->permissions) ) {
+            foreach ($request->permissions as $key => $value) {
+                $role->givePermissionTo($value);
+            }
         }
 
         if ($role) {
@@ -246,6 +249,7 @@ class ServicesController extends Controller
         }
         $payloadPembayaran['pick_&_delivery'] = 1;
         $payloadPembayaran['payable_to'] = "admin";
+        $payloadPembayaran['tax'] = 0;
         $payloadPembayaran['id'] = $request->pembayaran_id;
 
 
@@ -277,10 +281,7 @@ class ServicesController extends Controller
     function create_pembayaran()
     {
         $data = null;
-        $customers = DB::table('customers')->join('monitoring', function($q) {
-            $q->on('customers.id', '=', 'monitoring.customer_id')
-            ->where('detailing', 1)->where('packaging', 1);
-        })->get();
+        $customers = DB::table('customers')->get();
         return view('pages.pembayaran_form', compact('data', 'customers'));
     }
 
@@ -288,10 +289,7 @@ class ServicesController extends Controller
     function edit_pembayaran($id)
     {
         $data = DB::table('payments')->where('id', $id)->first();
-        $customers = DB::table('customers')->join('monitoring', function($q) {
-            $q->on('customers.id', '=', 'monitoring.customer_id')
-            ->where('detailing', 1)->where('packaging', 1);
-        })->get();
+        $customers = DB::table('customers')->get();
         return view('pages.pembayaran_form', compact('data', 'customers'));
     }
 
@@ -362,10 +360,7 @@ class ServicesController extends Controller
     function edit_penjemputan($id)
     {
         $data = DB::table('monitoring')->where('id', $id)->first();
-        $customers = DB::table('customers')->join('monitoring', function($q) {
-            $q->on('customers.id', '=', 'monitoring.customer_id')
-            ->where('delivery', 0)->orWhere('delivery', '=', null);
-        })->get();
+        $customers = DB::table('customers')->get();
         return view('pages.penjemputan_form', compact('data', 'customers'));
     }
 
@@ -420,10 +415,11 @@ class ServicesController extends Controller
             "treatment" => $payload['treatment'],
             "updated_at" => now()
         ]);
+
         unset($payload['treatment']);
         if ($payload['customer_id'] != 0) {
             $payload['updated_at'] = now();
-            $isSaved = DB::table('monitoring')->where('customer_id', $payload['customer_id'])->update($payload);
+            $isSaved = DB::table('monitoring')->where('id', $payload['id'])->update($payload);
             if ($isSaved) {
                 return redirect('/pengerjaan');
             }
@@ -443,10 +439,7 @@ class ServicesController extends Controller
     function create_pengerjaan()
     {
         $data = null;
-        $customers = DB::table('customers')->join('monitoring', function($q) {
-            $q->on('customers.id', '=', 'monitoring.customer_id')
-            ->where('delivery', 1);
-        })->get();
+        $customers = DB::table('customers')->get();
         return view('pages.pengerjaan_form', compact('data', 'customers'));
     }
 
@@ -454,16 +447,17 @@ class ServicesController extends Controller
     function edit_pengerjaan($id)
     {
         $data = DB::table('monitoring')
-            ->where('detailing', 1)
-            ->join('customers', function ($join) {
-                $join
-                    ->on('monitoring.customer_id', '=', 'customers.id')
-                    ->join('payments', 'customers.id', '=', 'payments.bill_to');
-            })->select('monitoring.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.shoe_brand as shoe_brand', 'payments.treatment as treatment')->first();
-        $customers = DB::table('customers')->join('monitoring', function($q) {
-            $q->on('customers.id', '=', 'monitoring.customer_id')
-            ->where('delivery', 1);
-        })->get();
+        //     ->where('detailing', 1)
+        //     ->join('customers', function ($join) {
+        //         $join
+        //             ->on('monitoring.customer_id', '=', 'customers.id')
+        //             ->join('payments', 'customers.id', '=', 'payments.bill_to');
+        //     })->select('monitoring.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.shoe_brand as shoe_brand', 'payments.treatment as treatment')->first();
+        // $customers = DB::table('customers')->join('monitoring', function($q) {
+        //     $q->on('customers.id', '=', 'monitoring.customer_id')
+        //     ->where('delivery', 1);
+        // })
+        ->get();
         return view('pages.pengerjaan_form', compact('data', 'customers'));
     }
 
@@ -506,9 +500,9 @@ class ServicesController extends Controller
 
         unset($payload['_token']);
         unset($payload['pengembalian_id']);
-        if ($payload['customer_id'] != 0) {
+        if ($payload['id'] != 0) {
             $payload['updated_at'] = now();
-            $isSaved = DB::table('monitoring')->where('customer_id', $payload['customer_id'])->update($payload);
+            $isSaved = DB::table('monitoring')->where('id', $payload['id'])->update($payload);
             if ($isSaved) {
                 return redirect('/pengembalian');
             }
@@ -528,10 +522,7 @@ class ServicesController extends Controller
     function create_pengembalian()
     {
         $data = null;
-        $customers = DB::table('customers')->join('monitoring', function($q) {
-            $q->on('customers.id', '=', 'monitoring.customer_id')
-            ->where('detailing', 1)->where('delivery', 1);
-        })->get();
+        $customers = DB::table('customers')->get();
         return view('pages.pengembalian_form', compact('data', 'customers'));
     }
 
@@ -539,11 +530,13 @@ class ServicesController extends Controller
     function edit_pengembalian($id)
     {
         $data = DB::table('monitoring')->where('id', $id)->first();
-        $customers = DB::table('customers')->join('monitoring', function($q) {
-            $q->on('customers.id', '=', 'monitoring.customer_id')
-            ->where('delivery', 1)
-            ->where('detailing', 1);
-        })->get();
+        $customers = DB::table('customers')
+        // ->join('monitoring', function($q) {
+        //     $q->on('customers.id', '=', 'monitoring.customer_id')
+        //     ->where('delivery', 1)
+        //     ->where('detailing', 1);
+        // })
+        ->get();
         return view('pages.pengembalian_form', compact('customers', 'data'));
     }
 
