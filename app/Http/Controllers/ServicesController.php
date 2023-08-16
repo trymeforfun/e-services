@@ -277,7 +277,10 @@ class ServicesController extends Controller
     function create_pembayaran()
     {
         $data = null;
-        $customers = DB::table('customers')->get();
+        $customers = DB::table('customers')->join('monitoring', function($q) {
+            $q->on('customers.id', '=', 'monitoring.customer_id')
+            ->where('detailing', 1)->where('packaging', 1);
+        })->get();
         return view('pages.pembayaran_form', compact('data', 'customers'));
     }
 
@@ -285,7 +288,10 @@ class ServicesController extends Controller
     function edit_pembayaran($id)
     {
         $data = DB::table('payments')->where('id', $id)->first();
-        $customers = DB::table('customers')->get();
+        $customers = DB::table('customers')->join('monitoring', function($q) {
+            $q->on('customers.id', '=', 'monitoring.customer_id')
+            ->where('detailing', 1)->where('packaging', 1);
+        })->get();
         return view('pages.pembayaran_form', compact('data', 'customers'));
     }
 
@@ -323,7 +329,7 @@ class ServicesController extends Controller
             $payload[$key] = $value;
         }
         $payload['delivery'] = 1;
-        $payload['id'] = $request->penjemputan_id;
+         $payload['id'] = $request->penjemputan_id;
 
         unset($payload['_token']);
         unset($payload['penjemputan_id']);
@@ -356,7 +362,10 @@ class ServicesController extends Controller
     function edit_penjemputan($id)
     {
         $data = DB::table('monitoring')->where('id', $id)->first();
-        $customers = DB::table('customers')->get();
+        $customers = DB::table('customers')->join('monitoring', function($q) {
+            $q->on('customers.id', '=', 'monitoring.customer_id')
+            ->where('delivery', 0)->orWhere('delivery', '=', null);
+        })->get();
         return view('pages.penjemputan_form', compact('data', 'customers'));
     }
 
@@ -434,7 +443,10 @@ class ServicesController extends Controller
     function create_pengerjaan()
     {
         $data = null;
-        $customers = DB::table('customers')->get();
+        $customers = DB::table('customers')->join('monitoring', function($q) {
+            $q->on('customers.id', '=', 'monitoring.customer_id')
+            ->where('delivery', 1);
+        })->get();
         return view('pages.pengerjaan_form', compact('data', 'customers'));
     }
 
@@ -448,7 +460,10 @@ class ServicesController extends Controller
                     ->on('monitoring.customer_id', '=', 'customers.id')
                     ->join('payments', 'customers.id', '=', 'payments.bill_to');
             })->select('monitoring.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.shoe_brand as shoe_brand', 'payments.treatment as treatment')->first();
-        $customers = DB::table('customers')->get();
+        $customers = DB::table('customers')->join('monitoring', function($q) {
+            $q->on('customers.id', '=', 'monitoring.customer_id')
+            ->where('delivery', 1);
+        })->get();
         return view('pages.pengerjaan_form', compact('data', 'customers'));
     }
 
@@ -513,7 +528,10 @@ class ServicesController extends Controller
     function create_pengembalian()
     {
         $data = null;
-        $customers = DB::table('customers')->get();
+        $customers = DB::table('customers')->join('monitoring', function($q) {
+            $q->on('customers.id', '=', 'monitoring.customer_id')
+            ->where('detailing', 1)->where('delivery', 1);
+        })->get();
         return view('pages.pengembalian_form', compact('data', 'customers'));
     }
 
@@ -521,7 +539,11 @@ class ServicesController extends Controller
     function edit_pengembalian($id)
     {
         $data = DB::table('monitoring')->where('id', $id)->first();
-        $customers = DB::table('customers')->get();
+        $customers = DB::table('customers')->join('monitoring', function($q) {
+            $q->on('customers.id', '=', 'monitoring.customer_id')
+            ->where('delivery', 1)
+            ->where('detailing', 1);
+        })->get();
         return view('pages.pengembalian_form', compact('customers', 'data'));
     }
 
