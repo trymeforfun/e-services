@@ -29,7 +29,7 @@
                         <td>{{ $data->customer_name }}</td>
                         <td>{{ $data->customer_phone }}</td>
                         <td>{{ $data->shoe_brand }}</td>
-                        <td>{{ $data->treatment }}</td>
+                        <td>{{ $data->comment }}</td>
                         <td>Pengerjaan</td>
                         <td>
                             <div class="d-flex gap-2">

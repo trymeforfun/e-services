@@ -19,7 +19,7 @@
                         @endforelse
                     </select>
                     <label class="form-label">Treatment</label>
-                    <input type="text" required name="treatment" value="{{ $data ? $data->treatment : '' }}"
+                    <input type="text" required name="comment" value="{{ $data ? $data->comment : '' }}"
                         class="form-control">
                 </div>
             </div>

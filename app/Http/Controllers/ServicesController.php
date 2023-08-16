@@ -379,22 +379,17 @@ class ServicesController extends Controller
     // ================================================================= Pengerjaan
     function get_pengerjaan(Request $request)
     {
-        $datas = DB::table('monitoring')->where(function ($customer) use ($request) {
+        $datas = DB::table('monitoring')->where('detailing', 1)->where(function ($customer) use ($request) {
             $customer->where('workmanship', 'like', '%' . $request->search . '%')
                 ->orWhere('pickup_date', 'like', '%' . $request->search . '%');
         })
-            ->where(function ($q) {
-                $q->where('packaging', 0)->orWhereNull('packaging');
-            })
-            ->where('detailing', 1)
             ->join('customers', function ($join) {
                 $join
-                    ->on('monitoring.customer_id', '=', 'customers.id')
-                    ->join('payments', 'customers.id', '=', 'payments.bill_to');
+                    ->on('monitoring.customer_id', '=', 'customers.id');
             })
             ->when($request->start_date && $request->end_date, function ($result) use ($request) {
                 $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
-            })->select('monitoring.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.shoe_brand as shoe_brand', 'payments.treatment as treatment')->paginate(10);
+            })->select('monitoring.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.shoe_brand as shoe_brand')->paginate(10);
 
         return view('pages.pengerjaan', compact('datas'));
     }
@@ -407,17 +402,12 @@ class ServicesController extends Controller
         }
         $payload['detailing'] = 1;
         $payload['id'] = $request->pengerjaan_id;
+        $payload['pickup_date'] = now();
 
         unset($payload['_token']);
         unset($payload['pengerjaan_id']);
 
-        DB::table('payments')->where('bill_to', $payload['customer_id'])->update([
-            "treatment" => $payload['treatment'],
-            "updated_at" => now()
-        ]);
-
-        unset($payload['treatment']);
-        if ($payload['customer_id'] != 0) {
+        if ($payload['id'] != 0) {
             $payload['updated_at'] = now();
             $isSaved = DB::table('monitoring')->where('id', $payload['id'])->update($payload);
             if ($isSaved) {
@@ -497,6 +487,7 @@ class ServicesController extends Controller
         }
         $payload['packaging'] = 1;
         $payload['id'] = $request->pengembalian_id;
+        $payload['pickup_date'] = now();
 
         unset($payload['_token']);
         unset($payload['pengembalian_id']);
