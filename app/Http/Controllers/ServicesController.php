@@ -170,16 +170,16 @@ class ServicesController extends Controller
                     $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
                 })->paginate(10);
         } else {
-             $customers = DB::table('customers')->where(function ($customer) use ($request) {
+            $customers = DB::table('customers')->where(function ($customer) use ($request) {
                 $customer->where('name', 'like', '%' . $request->search . '%')->orWhere('phone', 'like', '%' . $request->search . '%')
                     ->orWhere('size', 'like', '%' . $request->search . '%')
                     ->orWhere('minus', 'like', '%' . $request->search . '%')
                     ->orWhere('shoe_brand', 'like', '%' . $request->search . '%');
             })
-            ->join('payments', 'customers.id', '=', 'payments.bill_to')
-            ->when($request->start_date && $request->end_date, function ($result) use ($request) {
-                $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
-            })->paginate(10);
+                ->join('payments', 'customers.id', '=', 'payments.bill_to')
+                ->when($request->start_date && $request->end_date, function ($result) use ($request) {
+                    $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
+                })->paginate(10);
         }
 
         if (auth()->user()->hasRole('admin|customer')) {
@@ -187,11 +187,12 @@ class ServicesController extends Controller
             return view('pages.order_jasa', compact('customers'));
         } else if (auth()->user()->hasRole('shoe_keeper')) {
 
-            return view('pages.penjemputan', compact('customers'));
+            return redirect('/penjemputan');
         } else if (auth()->user()->hasRole('production_staff')) {
-            return view('pages.pengerjaan', compact('customers'));
+
+            return redirect('/pengerjaan');
         } else if (auth()->user()->hasRole('team_leader')) {
-            return view('pages.laporan', compact('customers'));
+            return redirect('/laporan');
         } else {
 
             return view('pages.order_jasa', compact('customers'));
