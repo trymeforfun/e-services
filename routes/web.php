@@ -15,8 +15,15 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
+Route::get('/login-pages', function () {
     return view('login');
+});
+Route::get('/register-pages', function () {
+    return view('register');
+});
+
+Route::get('/', function () {
+    return view('welcome');
 });
 
 // user & role & permission

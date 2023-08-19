@@ -21,6 +21,12 @@
                     <label class="form-label">Treatment</label>
                     <input type="text" required name="comment" value="{{ $data ? $data->comment : '' }}"
                         class="form-control">
+                    <label class="form-label">Status</label>
+                    <select class="form-select" required name="customer_id" id="">
+                        <option disabled>pilih</option>
+                        <option value="">Pengembalian</option>
+                        @endforelse
+                    </select>
                 </div>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>

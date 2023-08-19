@@ -10,8 +10,7 @@
                 <select class="form-select" required name="customer_id" id="">
                     <option disabled>pilih</option>
                     @forelse ($customers as $key => $cust)
-                        <option value="{{ $cust->id }}"
-                            @if ($cust->id == old('customer_id', $data->customer_id ?? 0)) selected="selected" @endif>
+                        <option value="{{ $cust->id }}" @if ($cust->id == old('customer_id', $data->customer_id ?? 0)) selected="selected" @endif>
                             {{ $cust->name }}</option>
                     @empty
                         <option value="">data tidak ditemukan</option>

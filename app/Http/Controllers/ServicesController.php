@@ -74,7 +74,7 @@ class ServicesController extends Controller
     {
         $role = Role::updateOrCreate(['id' => $request->role_id], ['name' => $request->role_name]);
 
-        if (isset($request->permissions) ) {
+        if (isset($request->permissions)) {
             foreach ($request->permissions as $key => $value) {
                 $role->givePermissionTo($value);
             }
@@ -158,14 +158,27 @@ class ServicesController extends Controller
     // ================================================================= CUSTOMERS
     function get_customers(Request $request)
     {
-        $customers = DB::table('customers')->where(function ($customer) use ($request) {
-            $customer->where('name', 'like', '%' . $request->search . '%')->orWhere('phone', 'like', '%' . $request->search . '%')
-                ->orWhere('size', 'like', '%' . $request->search . '%')
-                ->orWhere('minus', 'like', '%' . $request->search . '%')
-                ->orWhere('shoe_brand', 'like', '%' . $request->search . '%');
-        })->when($request->start_date && $request->end_date, function ($result) use ($request) {
-            $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
-        })->paginate(10);
+        if (auth()->user()->hasRole('admin')) {
+            $customers = DB::table('customers')->where(function ($customer) use ($request) {
+                $customer->where('name', 'like', '%' . $request->search . '%')->orWhere('phone', 'like', '%' . $request->search . '%')
+                    ->orWhere('size', 'like', '%' . $request->search . '%')
+                    ->orWhere('minus', 'like', '%' . $request->search . '%')
+                    ->orWhere('shoe_brand', 'like', '%' . $request->search . '%');
+            })->when($request->start_date && $request->end_date, function ($result) use ($request) {
+                $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
+            })->paginate(10);
+        } elseif (auth()->user()->hasRole('customer')) {
+            $customers = DB::table('customers')->where(function ($customer) use ($request) {
+                $customer->where('name', 'like', '%' . $request->search . '%')->orWhere('phone', 'like', '%' . $request->search . '%')
+                    ->orWhere('size', 'like', '%' . $request->search . '%')
+                    ->orWhere('minus', 'like', '%' . $request->search . '%')
+                    ->orWhere('shoe_brand', 'like', '%' . $request->search . '%');
+            })
+                ->where('user_id', auth()->user()->id)
+                ->when($request->start_date && $request->end_date, function ($result) use ($request) {
+                    $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
+                })->paginate(10);
+        }
 
         return view('pages.order_jasa', compact('customers'));
     }
@@ -282,6 +295,9 @@ class ServicesController extends Controller
     {
         $data = null;
         $customers = DB::table('customers')->get();
+        if (auth()->user()->hasRole('customer')) {
+            $customers = DB::table('customers')->where('user_id', auth()->user()->id)->get();
+        }
         return view('pages.pembayaran_form', compact('data', 'customers'));
     }
 
@@ -290,6 +306,9 @@ class ServicesController extends Controller
     {
         $data = DB::table('payments')->where('id', $id)->first();
         $customers = DB::table('customers')->get();
+        if (auth()->user()->hasRole('customer')) {
+            $customers = DB::table('customers')->where('user_id', auth()->user()->id)->get();
+        }
         return view('pages.pembayaran_form', compact('data', 'customers'));
     }
 
@@ -312,6 +331,8 @@ class ServicesController extends Controller
                 $q->where('detailing', 0)->orWhereNull('detailing');
             })
             ->where('delivery', 1)
+            ->whereNull('detailing')
+            ->whereNull('packaging')
             ->join('customers', 'monitoring.customer_id', '=', 'customers.id')
             ->when($request->start_date && $request->end_date, function ($result) use ($request) {
                 $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
@@ -327,7 +348,7 @@ class ServicesController extends Controller
             $payload[$key] = $value;
         }
         $payload['delivery'] = 1;
-         $payload['id'] = $request->penjemputan_id;
+        $payload['id'] = $request->penjemputan_id;
 
         unset($payload['_token']);
         unset($payload['penjemputan_id']);
@@ -353,6 +374,9 @@ class ServicesController extends Controller
     {
         $data = null;
         $customers = DB::table('customers')->get();
+        if (auth()->user()->hasRole('customer')) {
+            $customers = DB::table('customers')->where('user_id', auth()->user()->id)->get();
+        }
         return view('pages.penjemputan_form', compact('data', 'customers'));
     }
 
@@ -361,6 +385,9 @@ class ServicesController extends Controller
     {
         $data = DB::table('monitoring')->where('id', $id)->first();
         $customers = DB::table('customers')->get();
+        if (auth()->user()->hasRole('customer')) {
+            $customers = DB::table('customers')->where('user_id', auth()->user()->id)->get();
+        }
         return view('pages.penjemputan_form', compact('data', 'customers'));
     }
 
@@ -382,7 +409,7 @@ class ServicesController extends Controller
         $datas = DB::table('monitoring')->where('detailing', 1)->where(function ($customer) use ($request) {
             $customer->where('workmanship', 'like', '%' . $request->search . '%')
                 ->orWhere('pickup_date', 'like', '%' . $request->search . '%');
-        })
+        })->where('detailing', 1)->where('delivery, 1')
             ->join('customers', function ($join) {
                 $join
                     ->on('monitoring.customer_id', '=', 'customers.id');
@@ -430,6 +457,9 @@ class ServicesController extends Controller
     {
         $data = null;
         $customers = DB::table('customers')->get();
+        if (auth()->user()->hasRole('customer')) {
+            $customers = DB::table('customers')->where('user_id', auth()->user()->id)->get();
+        }
         return view('pages.pengerjaan_form', compact('data', 'customers'));
     }
 
@@ -437,17 +467,21 @@ class ServicesController extends Controller
     function edit_pengerjaan($id)
     {
         $data = DB::table('monitoring')
-        //     ->where('detailing', 1)
-        //     ->join('customers', function ($join) {
-        //         $join
-        //             ->on('monitoring.customer_id', '=', 'customers.id')
-        //             ->join('payments', 'customers.id', '=', 'payments.bill_to');
-        //     })->select('monitoring.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.shoe_brand as shoe_brand', 'payments.treatment as treatment')->first();
-        // $customers = DB::table('customers')->join('monitoring', function($q) {
-        //     $q->on('customers.id', '=', 'monitoring.customer_id')
-        //     ->where('delivery', 1);
-        // })
-        ->get();
+            //     ->where('detailing', 1)
+            //     ->join('customers', function ($join) {
+            //         $join
+            //             ->on('monitoring.customer_id', '=', 'customers.id')
+            //             ->join('payments', 'customers.id', '=', 'payments.bill_to');
+            //     })->select('monitoring.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.shoe_brand as shoe_brand', 'payments.treatment as treatment')->first();
+            // $customers = DB::table('customers')->join('monitoring', function($q) {
+            //     $q->on('customers.id', '=', 'monitoring.customer_id')
+            //     ->where('delivery', 1);
+            // })
+            ->get();
+        $customers = DB::table('customers')->get();
+        if (auth()->user()->hasRole('customer')) {
+            $customers = DB::table('customers')->where('user_id', auth()->user()->id)->get();
+        }
         return view('pages.pengerjaan_form', compact('data', 'customers'));
     }
 
@@ -468,6 +502,8 @@ class ServicesController extends Controller
                 ->orWhere('pickup_date', 'like', '%' . $request->search . '%');
         })
             ->where('packaging', 1)
+            ->where('detailing', 1)
+            ->where('delivery', 1)
             ->join('customers', function ($join) {
                 $join
                     ->on('monitoring.customer_id', '=', 'customers.id');
@@ -514,6 +550,9 @@ class ServicesController extends Controller
     {
         $data = null;
         $customers = DB::table('customers')->get();
+        if (auth()->user()->hasRole('customer')) {
+            $customers = DB::table('customers')->where('user_id', auth()->user()->id)->get();
+        }
         return view('pages.pengembalian_form', compact('data', 'customers'));
     }
 
@@ -522,12 +561,10 @@ class ServicesController extends Controller
     {
         $data = DB::table('monitoring')->where('id', $id)->first();
         $customers = DB::table('customers')
-        // ->join('monitoring', function($q) {
-        //     $q->on('customers.id', '=', 'monitoring.customer_id')
-        //     ->where('delivery', 1)
-        //     ->where('detailing', 1);
-        // })
-        ->get();
+            ->get();
+        if (auth()->user()->hasRole('customer')) {
+            $customers = DB::table('customers')->where('user_id', auth()->user()->id)->get();
+        }
         return view('pages.pengembalian_form', compact('customers', 'data'));
     }
 
@@ -550,10 +587,10 @@ class ServicesController extends Controller
                 ->orWhere('minus', 'like', '%' . $request->search . '%')
                 ->orWhere('shoe_brand', 'like', '%' . $request->search . '%');
         })
-        ->join('payments', 'customers.id', '=', 'payments.bill_to')
-        ->when($request->start_date && $request->end_date, function ($result) use ($request) {
-            $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
-        })->paginate(10);
+            ->join('payments', 'customers.id', '=', 'payments.bill_to')
+            ->when($request->start_date && $request->end_date, function ($result) use ($request) {
+                $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
+            })->paginate(10);
 
         return view('pages.laporan', compact('customers'));
     }
@@ -567,10 +604,10 @@ class ServicesController extends Controller
                 ->orWhere('minus', 'like', '%' . $request->search . '%')
                 ->orWhere('shoe_brand', 'like', '%' . $request->search . '%');
         })
-        ->join('payments', 'customers.id', '=', 'payments.bill_to')
-        ->when($request->start_date && $request->end_date, function ($result) use ($request) {
-            $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
-        })->paginate(10);
+            ->join('payments', 'customers.id', '=', 'payments.bill_to')
+            ->when($request->start_date && $request->end_date, function ($result) use ($request) {
+                $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
+            })->paginate(10);
 
         $pdf = PDF::loadView('laporan_pdf', compact('customers'));
         $pdf->setPaper('A4', 'portrait');

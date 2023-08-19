@@ -19,6 +19,12 @@
                 <label class="form-label">Tanggal Penjemputan</label>
                 <input type="date" required name="pickup_date"
                     value="{{ $data ? $data->pickup_date : '' }}"class="form-control">
+                <label class="form-label">Status</label>
+                <select class="form-select" required name="customer_id" id="">
+                    <option disabled>pilih</option>
+                    <option value="">Pengerjaan</option>
+                    @endforelse
+                </select>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>

@@ -9,6 +9,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
@@ -30,22 +31,42 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
-        $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-        ]);
+        try {
 
-        $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-        ]);
+            $request->validate([
+                'name' => ['required', 'string', 'max:255'],
+                'email' => ['required', 'string', 'email', 'max:255', 'unique:' . User::class],
+                'password' => ['required', Rules\Password::defaults()],
+            ]);
 
-        event(new Registered($user));
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make($request->password),
+            ]);
+            $user->assignRole('customer');
 
-        Auth::login($user);
+            $customer = DB::table('customers')->insert([
+                'name' => $request->name,
+                'user_id'=> $user->id,
+                'phone' => null,
+                'address' => null,
+                'shoe_brand' => null,
+                'size' => null,
+                'color' => null,
+                'minus' => null,
+                'created_at' => now(),
+                'updated_at' => now()
+            ]);
 
-        return redirect(RouteServiceProvider::HOME);
+            event(new Registered($user));
+
+            Auth::login($user);
+
+            return redirect(RouteServiceProvider::HOME);
+        } catch (\Throwable $th) {
+            dd($th);
+            return $th->getMessage();
+        }
     }
 }

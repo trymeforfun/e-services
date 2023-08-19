@@ -42,7 +42,8 @@
                                         </div>
                                         <div class="d-flex align-items-center justify-content-between mt-4 mb-0">
 
-                                            <button class="btn btn-primary" type="submit">Login</button>
+                                            <button class="btn btn-primary" type="submit">Login</button><br>
+                                            <a class="btn btn-outline-primary btn-xl" href="{{ url('/register-pages') }}">Register</a>
                                         </div>
                                     </form>
                                 </div>
