@@ -564,9 +564,9 @@ class ServicesController extends Controller
                 $join
                     ->on('monitoring.customer_id', '=', 'customers.id');
             })
-            ->when($request->status, function ($q) use ($request) {
-                $q->where($request->status, 1);
-            })
+            // ->when($request->status, function ($q) use ($request) {
+            //     $q->where($request->status, 1);
+            // })
             ->when($request->start_date && $request->end_date, function ($result) use ($request) {
                 $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
             })->select('monitoring.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.address as customer_address')->paginate(10);
