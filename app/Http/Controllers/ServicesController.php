@@ -507,7 +507,7 @@ class ServicesController extends Controller
         }
         $payload['created_at'] = now();
         $payload['updated_at'] = now();
-
+        $payload['delivery'] = 1;
         $isSaved = DB::table('monitoring')->where('id', $payload['id'])->insertGetId($payload);
         if ($isSaved) {
             return redirect('/pengerjaan');
@@ -587,6 +587,9 @@ class ServicesController extends Controller
             }
             return back();
         }
+
+        $payload['detailing'] = 1;
+        $payload['delivery'] = 1;
         $payload['created_at'] = now();
         $payload['updated_at'] = now();
 
