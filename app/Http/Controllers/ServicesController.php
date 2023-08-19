@@ -360,9 +360,9 @@ class ServicesController extends Controller
                 $customer->where('workmanship', 'like', '%' . $request->search . '%')
                     ->orWhere('pickup_date', 'like', '%' . $request->search . '%');
             })
-                ->where(function ($q) {
-                    $q->where('detailing', 0)->orWhereNull('detailing');
-                })
+                // ->where(function ($q) {
+                //     $q->where('detailing', 0)->orWhereNull('detailing');
+                // })
                 ->where('delivery', 1)
                 ->whereNull('detailing')
                 ->whereNull('packaging')
@@ -378,9 +378,9 @@ class ServicesController extends Controller
                 $customer->where('workmanship', 'like', '%' . $request->search . '%')
                     ->orWhere('pickup_date', 'like', '%' . $request->search . '%');
             })
-                ->where(function ($q) {
-                    $q->where('detailing', 0)->orWhereNull('detailing');
-                })
+                // ->where(function ($q) {
+                //     $q->where('detailing', 0)->orWhereNull('detailing');
+                // })
                 ->where('delivery', 1)
                 ->whereNull('detailing')
                 ->whereNull('packaging')
@@ -467,7 +467,9 @@ class ServicesController extends Controller
         $datas = DB::table('monitoring')->where('detailing', 1)->where(function ($customer) use ($request) {
             $customer->where('workmanship', 'like', '%' . $request->search . '%')
                 ->orWhere('pickup_date', 'like', '%' . $request->search . '%');
-        })->where('detailing', 1)->where('delivery', 1)->whereNull('packaging')
+        })->where('detailing', 1)
+        // ->where('delivery', 1)
+        ->whereNull('packaging')
             ->join('customers', function ($join) {
                 $join
                     ->on('monitoring.customer_id', '=', 'customers.id');
@@ -554,8 +556,8 @@ class ServicesController extends Controller
                 ->orWhere('pickup_date', 'like', '%' . $request->search . '%');
         })
             ->where('packaging', 1)
-            ->where('detailing', 1)
-            ->where('delivery', 1)
+            // ->where('detailing', 1)
+            // ->where('delivery', 1)
             ->join('customers', function ($join) {
                 $join
                     ->on('monitoring.customer_id', '=', 'customers.id');
