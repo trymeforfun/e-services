@@ -203,6 +203,7 @@ class ServicesController extends Controller
     {
         if ($request->customer_id != 0) {
             $customer = DB::table('customers')->where('id', $request->customer_id)->update([
+                'user_id' => auth()->user()->hasRole('customer') ? auth()->user()->id : $request->customer_id,
                 'name' => $request->name,
                 'phone' => $request->phone,
                 'address' => $request->address,
@@ -218,6 +219,7 @@ class ServicesController extends Controller
         }
 
         $customer = DB::table('customers')->where('id', $request->customer_id)->insert([
+            'user_id' => auth()->user()->hasRole('customer') ? auth()->user()->id : $request->customer_id,
             'name' => $request->name,
             'phone' => $request->phone,
             'address' => $request->address,
@@ -561,6 +563,9 @@ class ServicesController extends Controller
             ->join('customers', function ($join) {
                 $join
                     ->on('monitoring.customer_id', '=', 'customers.id');
+            })
+            ->when($request->status, function ($q) use ($request) {
+                $q->where($request->status, 1);
             })
             ->when($request->start_date && $request->end_date, function ($result) use ($request) {
                 $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);

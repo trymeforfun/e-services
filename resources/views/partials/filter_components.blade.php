@@ -13,6 +13,17 @@
             </div>
         </div>
     </div>
+    {{-- @if(Request::path() == "/penjemputan" || Request::path() == "/pengembalian" || Request::path() == "/pengerjaan")
+    <div class="col-12">
+        <div class="row">
+            <select name="status" id="">
+                <option value="delivery">Penjemputan</option>
+                <option value="detailing">Pengerjaan</option>
+                <option value="packaging">Pengembalian</option>
+            </select>
+        </div>
+    </div>
+    @endif --}}
     <div class="col-2">
         <button class="btn btn-outline-secondary" type="submit" id="button-addon2">search</button>
     </div>
