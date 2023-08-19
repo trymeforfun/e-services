@@ -19,8 +19,10 @@
                     <th scope="col">Tagihan untuk</th>
                     <th scope="col">Tenggat Waktu</th>
                     <th scope="col">Diskon</th>
+                    <th scope="col">Treatment</th>
                     <th scope="col">Tax</th>
                     <th scope="col">Jumlah jatuh tempo</th>
+                    <th scope="col">Bank</th>
                     <th scope="col">Total</th>
                     <th scope="col">Aksi</th>
                 </tr>
@@ -32,8 +34,10 @@
                         <td>{{ $data->customer_name }}</td>
                         <td>{{ $data->due_date }}</td>
                         <td>{{ $data->discount }}</td>
+                        <td>{{ $data->treatment }}</td>
                         <td>{{ $data->tax }}</td>
                         <td>{{ $data->amount_due }}</td>
+                        <td>{{ $data->bank }}</td>
                         <td>{{ $data->total }}</td>
                         <td>
                             <div class="d-flex gap-2">

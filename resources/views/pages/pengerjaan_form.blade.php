@@ -22,10 +22,10 @@
                     <input type="text" required name="comment" value="{{ $data ? $data->comment : '' }}"
                         class="form-control">
                     <label class="form-label">Status</label>
-                    <select class="form-select" required name="customer_id" id="">
+                    <select class="form-select" required name="status" id="">
                         <option disabled>pilih</option>
-                        <option value="">Pengembalian</option>
-                        @endforelse
+                        <option value="pengerjaan">Pengerjaan</option>
+                        <option value="pengembalian">Pengembalian</option>
                     </select>
                 </div>
             </div>

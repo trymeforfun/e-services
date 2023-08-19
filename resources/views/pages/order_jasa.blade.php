@@ -16,9 +16,12 @@
             <thead>
                 <tr>
                     <th scope="col">Nama Customer</th>
+                    <th scope="col">Tanggal Order</th>
                     <th scope="col">No. HP</th>
                     <th scope="col">Brand Sepatu</th>
                     <th scope="col">Ukuran</th>
+                    <th scope="col">Alamat</th>
+                    <th scope="col">Warna</th>
                     <th scope="col">Minus</th>
                     <th scope="col">Aksi</th>
                 </tr>
@@ -27,8 +30,11 @@
                 @forelse ($customers as $customer)
                     <tr>
                         <td>{{ $customer->name }}</td>
+                        <td>{{ $customer->order_date }}</td>
                         <td>{{ $customer->phone }}</td>
                         <td>{{ $customer->shoe_brand }}</td>
+                        <td>{{ $customer->address }}</td>
+                        <td>{{ $customer->color }}</td>
                         <td>{{ $customer->size }}</td>
                         <td>{{ $customer->minus }}</td>
                         <td>

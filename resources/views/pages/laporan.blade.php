@@ -24,6 +24,8 @@
                     <th scope="col">Tanggal Masuk</th>
                     <th scope="col">Tanggal Keluar</th>
                     <th scope="col">Merk Sepatu</th>
+                    <th scope="col">Alamat</th>
+                    <th scope="col">No Telp</th>
                     <th scope="col">Treatment</th>
                     <th scope="col">Jumlah</th>
                     <th scope="col">Harga</th>
@@ -39,6 +41,8 @@
                         <td>{{ $customer->order_date }}</td>
                         <td>{{ $customer->updated_at }}</td>
                         <td>{{ $customer->shoe_brand }}</td>
+                        <td>{{ $customer->address }}</td>
+                        <td>{{ $customer->phone }}</td>
                         <td>{{ $customer->treatment }}</td>
                         <td>{{ $customer->many }}</td>
                         <td>{{ $customer->price }}</td>

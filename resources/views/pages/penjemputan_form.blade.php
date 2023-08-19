@@ -20,10 +20,10 @@
                 <input type="date" required name="pickup_date"
                     value="{{ $data ? $data->pickup_date : '' }}"class="form-control">
                 <label class="form-label">Status</label>
-                <select class="form-select" required name="customer_id" id="">
+                <select class="form-select" required name="status" id="">
                     <option disabled>pilih</option>
-                    <option value="">Pengerjaan</option>
-                    @endforelse
+                    <option value="penjemputan">Penjemputan</option>
+                    <option value="pengerjaan">Pengerjaan</option>
                 </select>
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>

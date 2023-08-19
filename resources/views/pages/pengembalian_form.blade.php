@@ -18,6 +18,12 @@
                 </select>
                 <label class="form-label">Komentar</label>
                 <textarea name="comment" id="" required class="form-control" cols="10" rows="2">{{ $data ? $data->comment : '' }}</textarea>
+                {{-- <label class="form-label">Status</label>
+                <select class="form-select" required name="status" id="">
+                    <option disabled>pilih</option>
+                    <option value="pengembalian">Pengembalian</option>
+                    <option value="pembayaran">Pengerjaan</option>
+                </select> --}}
             </div>
             <button type="submit" class="btn btn-primary">Submit</button>
         </form>
