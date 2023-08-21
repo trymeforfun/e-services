@@ -470,8 +470,8 @@ class ServicesController extends Controller
             $customer->where('workmanship', 'like', '%' . $request->search . '%')
                 ->orWhere('pickup_date', 'like', '%' . $request->search . '%');
         })->where('detailing', 1)
-        // ->where('delivery', 1)
-        ->whereNull('packaging')
+            // ->where('delivery', 1)
+            ->whereNull('packaging')
             ->join('customers', function ($join) {
                 $join
                     ->on('monitoring.customer_id', '=', 'customers.id');
@@ -553,23 +553,46 @@ class ServicesController extends Controller
     // ================================================================= Pengembalian
     function get_pengembalian(Request $request)
     {
-        $datas = DB::table('monitoring')->where(function ($customer) use ($request) {
-            $customer->where('workmanship', 'like', '%' . $request->search . '%')
-                ->orWhere('pickup_date', 'like', '%' . $request->search . '%');
-        })
-            ->where('packaging', 1)
-            // ->where('detailing', 1)
-            // ->where('delivery', 1)
-            ->join('customers', function ($join) {
-                $join
-                    ->on('monitoring.customer_id', '=', 'customers.id');
+
+        if (auth()->user()->hasRole('customer')) {
+
+            $datas = DB::table('monitoring')->where(function ($customer) use ($request) {
+                $customer->where('workmanship', 'like', '%' . $request->search . '%')
+                    ->orWhere('pickup_date', 'like', '%' . $request->search . '%');
             })
-            // ->when($request->status, function ($q) use ($request) {
-            //     $q->where($request->status, 1);
-            // })
-            ->when($request->start_date && $request->end_date, function ($result) use ($request) {
-                $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
-            })->select('monitoring.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.address as customer_address')->paginate(10);
+                ->where('packaging', 1)
+                // ->where('detailing', 1)
+                // ->where('delivery', 1)
+                ->join('customers', function ($join) {
+                    $join
+                        ->on('monitoring.customer_id', '=', 'customers.id')->where('customers.user_id', '=', auth()->user()->id);
+                })
+                // ->when($request->status, function ($q) use ($request) {
+                //     $q->where($request->status, 1);
+                // })
+                ->when($request->start_date && $request->end_date, function ($result) use ($request) {
+                    $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
+                })->select('monitoring.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.address as customer_address')->paginate(10);
+        } else {
+
+            $datas = DB::table('monitoring')->where(function ($customer) use ($request) {
+                $customer->where('workmanship', 'like', '%' . $request->search . '%')
+                    ->orWhere('pickup_date', 'like', '%' . $request->search . '%');
+            })
+                ->where('packaging', 1)
+                // ->where('detailing', 1)
+                // ->where('delivery', 1)
+                ->join('customers', function ($join) {
+                    $join
+                        ->on('monitoring.customer_id', '=', 'customers.id');
+                })
+                // ->when($request->status, function ($q) use ($request) {
+                //     $q->where($request->status, 1);
+                // })
+                ->when($request->start_date && $request->end_date, function ($result) use ($request) {
+                    $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
+                })->select('monitoring.*', 'customers.name as customer_name', 'customers.phone as customer_phone', 'customers.address as customer_address')->paginate(10);
+        }
 
         return view('pages.pengembalian', compact('datas'));
     }
@@ -669,17 +692,26 @@ class ServicesController extends Controller
             ->join('payments', 'customers.id', '=', 'payments.bill_to')
             ->when($request->start_date && $request->end_date, function ($result) use ($request) {
                 $result->where('created_at', '>', $request->start_date)->where('created_at', '<', $request->end_date);
-            })->paginate(10);
+            });
 
-        $pdf = PDF::loadView('laporan_pdf', compact('customers'));
-        $pdf->setPaper('A4', 'portrait');
-        $pdf->setOption('margin-top', 0);
-        $pdf->setOption('margin-right', 0);
-        $pdf->setOption('margin-bottom', 0);
-        $pdf->setOption('margin-left', 0);
 
-        $loadPdf = $pdf->stream('data-laporan.pdf');
+        $total = $customers->count();
+        $customers = $customers->paginate(10);
 
-        return $loadPdf;
+
+        if ($total > 0) {
+            $pdf = PDF::loadView('laporan_pdf', compact('customers'));
+            $pdf->setPaper('A4', 'portrait');
+            $pdf->setOption('margin-top', 0);
+            $pdf->setOption('margin-right', 0);
+            $pdf->setOption('margin-bottom', 0);
+            $pdf->setOption('margin-left', 0);
+
+            $loadPdf = $pdf->stream('data-laporan.pdf');
+
+            return $loadPdf;
+        }
+
+        return back();
     }
 }

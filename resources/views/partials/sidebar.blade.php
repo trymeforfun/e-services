@@ -23,7 +23,7 @@
                         Pengerjaan
                     </a>
                     @endrole
-                    @role('shoe_keeper|customer')
+                    @role('admin|shoe_keeper|customer')
                     <a class="nav-link {{ Request::path() == 'pengembalian' ? 'bg-secondary' : '' }}"
                         href="{{ url('/pengembalian') }}">
                         Pengembalian
